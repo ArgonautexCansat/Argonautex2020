@@ -1,27 +1,40 @@
-#!/usr/bin/env python
-#
-# Copyright (c) 2020, Pycom Limited.
-#
-# This software is licensed under the GNU GPL version 3 or any
-# later version, with permitted additional terms. For more information
-# see the Pycom Licence v1.0 document supplied with this file, or
-# available at https://www.pycom.io/opensource/licensing
-#
-
-# See https://docs.pycom.io for more information regarding library specifics
-
 import time
 import pycom
-from pysense import Pysense
 import machine
+import socket
 
+from pysense import Pysense
+from network import LoRa
 from LIS2HH12 import LIS2HH12
 from SI7006A20 import SI7006A20
 from LTR329ALS01 import LTR329ALS01
 from MPL3115A2 import MPL3115A2,ALTITUDE,PRESSURE
 
+print("Starting LoRa...")
+
+# Initialise LoRa in LORA mode
+# Region = Europe (868MHz)
+# More parameters need to be set
+lora = LoRa(mode=LoRa.LORA, region=LoRa.EU868)
+
+# Create raw LoRa socket
+s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
+
+# Sensor values
+mp_temperature = 0
+mp_altitude = 0
+mp_pressure = 0
+
+si_temperature = 0
+si_humidity = 0
+
+li_roll = 0
+li_pitch = 0
+
+battery_voltage = 0
+
 pycom.heartbeat(False)
-pycom.rgbled(0x0A0A08) # white
+pycom.rgbled(0x000000)
 
 py = Pysense()
 
