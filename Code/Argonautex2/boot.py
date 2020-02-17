@@ -1,12 +1,17 @@
 from machine import SD
+from machine import UART
 import pycom
 import os
+
+uart = UART(0, 115200)
+os.dupterm(uart)
 
 print("Starting Argonautex II...")
 
 # Disable unnecessary pycom features
 pycom.wifi_on_boot(False) 
 pycom.heartbeat(False)
+pycom.rgbled(0x000000)
 
 # SD Card header
 try:       

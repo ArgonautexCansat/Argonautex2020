@@ -2,6 +2,7 @@ import time
 import pycom
 import machine
 import socket
+import _thread
 
 from pysense import Pysense
 from network import LoRa
@@ -20,48 +21,55 @@ lora = LoRa(mode=LoRa.LORA, region=LoRa.EU868)
 # Create raw LoRa socket
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
 
+# Sensor objects
+py  = Pysense()
+
+mp  = MPL3115A2(py,mode=ALTITUDE)
+mpp = MPL3115A2(py,mode=PRESSURE)
+si  = SI7006A20(py)
+lt  = LTR329ALS01(py)
+li  = LIS2HH12(py)
+
 # Sensor values
-mp_temperature = 0
-mp_altitude = 0
-mp_pressure = 0
+class DataPacket(object):
+    # Battery percentage
+    battery_percent = None
 
-si_temperature = 0
-si_humidity = 0
+    # Atmospheric values
+    temperature = None
+    altitude    = None
+    pressure    = None
+    humidity    = None
 
-li_roll = 0
-li_pitch = 0
+    # Gyro rotation
+    roll  = None
+    pitch = None
+    yaw   = None
 
-battery_voltage = 0
+packet = DataPacket()
 
-pycom.heartbeat(False)
-pycom.rgbled(0x000000)
+def th_func1(delay, id):
+    while True:
+        packet.temperature = mp.temperature()
+        packet.altitude = mp.altitude()
+        packet.pressure = mpp.pressure()
+        packet.humidity = si.humidity()
 
-py = Pysense()
+        packet.roll = li.roll()
+        packet.pitch = li.pitch()
 
-mp = MPL3115A2(py,mode=ALTITUDE) # Returns height in meters. Mode may also be set to PRESSURE, returning a value in Pascals
-print("MPL3115A2 temperature: " + str(mp.temperature()))
-print("Altitude: " + str(mp.altitude()))
-mpp = MPL3115A2(py,mode=PRESSURE) # Returns pressure in Pa. Mode may also be set to ALTITUDE, returning a value in meters
-print("Pressure: " + str(mpp.pressure()))
+        print("Read sensors.")
+        time.sleep(1)
 
+def th_func2(delay, id):
+    while True:
+        print("Temperature: " + str(packet.temperature))
+        print("Altitude: " + str(packet.altitude))
+        print("Pressure: " + str(packet.pressure))
+        print("Humidity: " + str(packet.humidity))
 
-si = SI7006A20(py)
-print("Temperature: " + str(si.temperature())+ " deg C and Relative Humidity: " + str(si.humidity()) + " %RH")
-print("Dew point: "+ str(si.dew_point()) + " deg C")
-t_ambient = 24.4
-print("Humidity Ambient for " + str(t_ambient) + " deg C is " + str(si.humid_ambient(t_ambient)) + "%RH")
+        time.sleep(1)
 
+_thread.start_new_thread(th_func1, (0, 0))
+_thread.start_new_thread(th_func2, (0, 0))
 
-lt = LTR329ALS01(py)
-print("Light (channel Blue lux, channel Red lux): " + str(lt.light()))
-
-li = LIS2HH12(py)
-print("Acceleration: " + str(li.acceleration()))
-print("Roll: " + str(li.roll()))
-print("Pitch: " + str(li.pitch()))
-
-print("Battery voltage: " + str(py.read_battery_voltage()))
-
-time.sleep(3)
-py.setup_sleep(10)
-py.go_to_sleep()
