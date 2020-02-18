@@ -11,7 +11,7 @@ print("Starting Argonautex II...")
 # Disable unnecessary pycom features
 pycom.wifi_on_boot(False) 
 pycom.heartbeat(False)
-pycom.rgbled(0x000000)
+pycom.rgbled(0)
 
 # SD Card header
 try:       
@@ -21,7 +21,7 @@ try:
     files = os.listdir('/sd')
 
     # data.csv doesn't exist
-    if 'data.csv' not in files:
+    if 'DATA.CSV' not in files:
         f = open('/sd/data.csv', 'w')
         f.write('Test Header')
         f.close()

@@ -48,7 +48,7 @@ class DataPacket(object):
 
 packet = DataPacket()
 
-def th_func1(delay, id):
+def read_sensors(delay, id):
     while True:
         packet.temperature = mp.temperature()
         packet.altitude = mp.altitude()
@@ -58,18 +58,15 @@ def th_func1(delay, id):
         packet.roll = li.roll()
         packet.pitch = li.pitch()
 
-        print("Read sensors.")
-        time.sleep(1)
-
-def th_func2(delay, id):
+def send_data(delay, id):
     while True:
         print("Temperature: " + str(packet.temperature))
         print("Altitude: " + str(packet.altitude))
         print("Pressure: " + str(packet.pressure))
         print("Humidity: " + str(packet.humidity))
 
-        time.sleep(1)
+        time.sleep(3)
 
-_thread.start_new_thread(th_func1, (0, 0))
-_thread.start_new_thread(th_func2, (0, 0))
+_thread.start_new_thread(read_sensors, (0, 0))
+_thread.start_new_thread(send_data, (0, 0))
 
