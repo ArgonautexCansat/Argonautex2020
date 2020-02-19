@@ -6,7 +6,7 @@ import os
 uart = UART(0, 115200)
 os.dupterm(uart)
 
-print("Starting Argonautex II...")
+print("Starting Argonautex II ground station...")
 
 # Disable unnecessary pycom features
 pycom.wifi_on_boot(False) 
